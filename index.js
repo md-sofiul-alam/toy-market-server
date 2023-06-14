@@ -6,11 +6,12 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 const corsConfig = {
-    origin: '',
+    origin: '*',
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE']
+    // methods: ['GET', 'POST', 'PUT', 'DELETE']
+    optionSuccessStatus:200,
 }
-app.use(cors())
+// app.use(cors())
 app.options("", cors(corsConfig))
 app.use(express.json());
 
