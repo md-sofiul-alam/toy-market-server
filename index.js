@@ -5,8 +5,13 @@ require('dotenv').config()
 const app = express();
 const port = process.env.PORT || 5000;
 
-app.use(cors());
-//     methods: ['GET', 'POST', 'PUT', 'DELETE']
+const corsConfig = {
+    origin: '',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE']
+}
+app.use(cors())
+app.options("", cors(corsConfig))
 app.use(express.json());
 
 
@@ -22,8 +27,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-      // Connect the client to the server	(optional starting in v4.7)
-      // await client.connect();
+      
       client.connect();
 
       const galleryCollection = client.db('toyCar').collection('gallery');
@@ -31,7 +35,6 @@ async function run() {
       // send data to database
       app.post('/gallery', async (req, res) => {
           const myToy = req.body;
-          // console.log(newToy);
           const result = await galleryCollection.insertOne(myToy);
           res.send(result)
       })
