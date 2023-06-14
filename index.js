@@ -22,13 +22,30 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
+      // Connect the client to the server	(optional starting in v4.7)
+      // await client.connect();
       client.connect();
 
-      const galleryCollection = client.db('your-toy').collection('gallery');
-      // const toyCollection = client.db('toyCar').collection('toys');
+      const galleryCollection = client.db('toyCar').collection('gallery');
 
-  
-      // single data reading from db
+      // send data to database
+      app.post('/gallery', async (req, res) => {
+          const myToy = req.body;
+          // console.log(newToy);
+          const result = await galleryCollection.insertOne(myToy);
+          res.send(result)
+      })
+
+      // // ============ Toys =============
+      // read data form database
+      app.get('/gallery', async (req, res) => {
+          const cursor = galleryCollection.find();
+          const result = await cursor.toArray();
+          res.send(result);
+      })
+
+
+      // read single data from db
       app.get('/gallery/:id', async (req, res) => {
           const id = req.params.id;
           const query = { _id: new ObjectId(id) };
@@ -36,47 +53,15 @@ async function run() {
           res.send(result);
       })
 
-      // send data to database
-      app.post('/gallery', async (req, res) => {
-          const myToy = req.body;
-        //   console.log(myToy);
-          const result = await galleryCollection.insertOne(myToy);
-          res.send(result)
-      })
-
-      // ============ Toys =============
-      // read data
-      app.get('/gallery', async (req, res) => {
-        //   let query = {};
-        //   if (req.query?.email) {
-        //       query = { email: req.query.email }
-        //   }
-
-
-          const cursor = galleryCollection.find();
-          const result = await cursor.toArray();
-          res.send(result);
-      })
-
-      // read single data from db
-      app.get('/toys/:id', async (req, res) => {
+      app.delete('/gallery/:id', async (req, res) => {
           const id = req.params.id;
           const query = { _id: new ObjectId(id) };
-          const result = await toyCollection.findOne(query);
+          const result = await galleryCollection.deleteOne(query);
           res.send(result);
-      })
-
-
-      // send data to database
-      app.post('/toys', async (req, res) => {
-          const toy = req.body;
-         
-          const result = await toyCollection.insertOne(toy);
-          res.send(result)
       })
 
       // update single toy data
-      app.put('/toys/:id', async (req, res) => {
+      app.put('/gallery/:id', async (req, res) => {
           const id = req.params.id;
           const filter = { _id: new ObjectId(id) };
           const options = { upsert: true };
@@ -88,22 +73,17 @@ async function run() {
                   price: updatedToy.price
               }
           }
-          const result = await toyCollection.updateOne(filter, toy, options);
+          const result = await galleryCollection.updateOne(filter, toy, options);
           res.send(result);
       })
 
-      app.delete('/toys/:id', async (req, res) => {
-          const id = req.params.id;
-          const query = { _id: new ObjectId(id) };
-          const result = await toyCollection.deleteOne(query);
-          res.send(result);
-      })
 
       // Send a ping to confirm a successful connection
       await client.db("admin").command({ ping: 1 });
       console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
-//  await client.close();
+      // Ensures that the client will close when you finish/error
+      // await client.close();
   }
 }
 run().catch(console.dir);
